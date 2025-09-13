@@ -272,3 +272,48 @@ debug_matches_and_kp("lejos0", "lejos1", lejos0, lejos1,
                      kp_final_lejos0, desc_final_lejos0,
                      kp_final_lejos1, desc_final_lejos1,
                      matches_final_lejos01, max_show=40)
+
+
+
+
+
+
+
+
+
+
+# --- Debug: información rápida antes de RANSAC ---
+def debug_matches_and_kp(name1, name2, img1, img2, kp1, desc1, kp2, desc2, matches, max_show=50):
+    print(f"DEBUG {name1} ↔ {name2}")
+    print(f"  kp {name1}: {0 if kp1 is None else len(kp1)}    desc {name1}: {None if desc1 is None else desc1.shape}")
+    print(f"  kp {name2}: {0 if kp2 is None else len(kp2)}    desc {name2}: {None if desc2 is None else desc2.shape}")
+    if matches is None:
+        print("  matches: None")
+        return
+    print(f"  matches (good): {len(matches)}")
+
+    # If no matches or <4, stop early
+    if len(matches) < 4:
+        print("  ¡Pocos matches! No es posible estimar homografía (se requieren al menos 4).")
+    else:
+        print("  Hay al menos 4 matches — se intentará RANSAC.")
+
+    # Mostrar imagen con matches (hasta max_show)
+    try:
+        import cv2, matplotlib.pyplot as plt
+        draw_matches = matches[:max_show]
+        img_matches = cv2.drawMatches(img1, kp1, img2, kp2, draw_matches, None,
+                                     flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+        plt.figure(figsize=(18,8))
+        plt.imshow(cv2.cvtColor(img_matches, cv2.COLOR_BGR2RGB))
+        plt.title(f"Top {len(draw_matches)} matches {name1} ↔ {name2}")
+        plt.axis('off')
+        plt.show()
+    except Exception as e:
+        print("  No se pudo dibujar matches:", e)
+
+# Insertar justo después de que calculás matches_final_cerca01
+debug_matches_and_kp("cerca0", "cerca1", cerca0, cerca1,
+                     kp_final_cerca0, desc_final_cerca0,
+                     kp_final_cerca1, desc_final_cerca1,
+                     matches_final_cerca01, max_show=40)
